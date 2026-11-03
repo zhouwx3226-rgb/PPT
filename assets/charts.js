@@ -1197,29 +1197,42 @@
     function p(n) { return (n < 10 ? '0' : '') + n; }
     return (d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
   }
-  /* 导出带当前数据的分享版：单文件版导出完整 HTML，工程版导出 JSON 数据包 */
-  function exportShare() {
-    var isSingleFile = !document.querySelector('script[src]');
-    if (isSingleFile) {
-      var json = JSON.stringify(currentData).replace(/</g, '\\u003c');
-      var html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-      html = html.replace(/window\.DEFAULT_DATA = [\s\S]*?<\/script>/, 'window.DEFAULT_DATA = ' + json + ';\n</script>');
-      var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = '淘系二级指标监控看板-已更新数据.html';
-      a.click();
-      setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
-      toast('已导出分享版：把「淘系二级指标监控看板-已更新数据.html」发给任何人，双击打开即是最新数据', false);
-    } else {
-      var blob2 = new Blob([JSON.stringify(currentData, null, 1)], { type: 'application/json' });
-      var a2 = document.createElement('a');
-      a2.href = URL.createObjectURL(blob2);
-      a2.download = 'tmall-data-' + new Date().toISOString().slice(0, 10) + '.json';
-      a2.click();
-      setTimeout(function () { URL.revokeObjectURL(a2.href); }, 3000);
-      toast('已导出 JSON 数据包：把它发给助手即可更新线上分享链接的数据', false);
+  /* 导出带最新数据的自包含 HTML：抓取外部脚本内联、数据替换为当前值 */
+  var CDN_LIBS = {
+    echarts: 'https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js',
+    xlsx: 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
+  };
+  async function exportShare() {
+    var clone = document.documentElement.cloneNode(true);
+    var scripts = clone.querySelectorAll('script[src]');
+    for (var i = 0; i < scripts.length; i++) {
+      var s = scripts[i], src = s.getAttribute('src'), inl = null;
+      try {
+        var r = await fetch(src);
+        if (r.ok) inl = await r.text();
+      } catch (e) { /* file:// 下 fetch 受限 */ }
+      if (inl != null) {
+        s.removeAttribute('src');
+        s.textContent = inl;
+      } else if (/echarts/i.test(src)) {
+        s.setAttribute('src', CDN_LIBS.echarts);
+      } else if (/xlsx/i.test(src)) {
+        s.setAttribute('src', CDN_LIBS.xlsx);
+      } else {
+        toast('当前环境无法读取脚本文件，请使用单文件版或线上链接导出', true);
+        return;
+      }
     }
+    var json = JSON.stringify(currentData).replace(/</g, '\\u003c');
+    var html = '<!DOCTYPE html>\n' + clone.outerHTML;
+    html = html.replace(/window\.DEFAULT_DATA = [\s\S]*?<\/script>/, 'window.DEFAULT_DATA = ' + json + ';\n</script>');
+    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '淘系二级指标监控看板-已更新数据.html';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
+    toast('已导出分享版（HTML·含最新数据）：发给任何人双击即可打开', false);
   }
 
   /* ---------- 事件绑定 ---------- */
