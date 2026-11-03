@@ -123,6 +123,31 @@
   body.edit-on td[contenteditable]:focus{background:#FFF;box-shadow:inset 0 0 0 2px var(--accent);outline:none}
   #editHint{font-size:12px;opacity:.9;color:#FFE3D0}
 
+  /* ===== 借鉴改进：导航 / 摘要 / 状态条 ===== */
+  #secNav{
+    position:sticky;top:0;z-index:150;background:#2B1A17;border-top:1px solid rgba(255,255,255,.08);
+    display:flex;gap:4px;padding:6px 28px;overflow-x:auto;
+  }
+  #secNav .nav-btn{
+    padding:6px 16px;border-radius:6px;font-size:12.5px;font-weight:500;color:#C9AFA6;
+    cursor:pointer;border:none;background:transparent;white-space:nowrap;font-family:inherit;transition:all .15s;
+  }
+  #secNav .nav-btn:hover{background:rgba(255,255,255,.08);color:#F1E4DD}
+  #secNav .nav-btn.active{background:rgba(232,58,58,.25);color:#FFD9D0;border-bottom:2px solid #FF6B5E;border-radius:6px 6px 0 0}
+  .section{scroll-margin-top:52px}
+  .sum-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 4px}
+  .sum-box{background:#FFF;border:1px solid var(--rule);border-radius:10px;padding:13px 16px;box-shadow:0 1px 3px rgba(43,26,23,.06)}
+  .sum-box-title{font-size:11px;font-weight:700;color:#B08D80;letter-spacing:.5px;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+  .sum-box-title::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .sum-box p{font-size:12.5px;color:#6B544C;line-height:1.85;margin:0}
+  .sum-box strong{color:var(--ink);font-weight:600}
+  .hu{color:#0A8F5B;font-weight:700}.hd{color:#C22F2F;font-weight:700}.hw{color:#C77E0A;font-weight:700}
+  .pb-w{display:flex;align-items:center;gap:6px;justify-content:center}
+  .pb{width:52px;height:4px;background:#F0E2DC;border-radius:2px;overflow:hidden;flex-shrink:0}
+  .pb-f{height:100%;border-radius:2px}
+  .pb-good{background:#0A8F5B}.pb-ok{background:#E8776B}.pb-warn{background:#E2A33C}.pb-bad{background:#A62B23}
+  @media (max-width:900px){.sum-row{grid-template-columns:1fr}}
+
   /* toast */
   #toast{
     position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);
@@ -144,7 +169,6 @@
     .card,.kpi{break-inside:avoid}
   }
 </style>
-<!-- deploy 1793668881490 -->
 </head>
 <body>
 
@@ -171,6 +195,14 @@
   </div>
 </header>
 
+<nav id="secNav">
+  <button class="nav-btn" data-target="sec1">01 经营结果</button>
+  <button class="nav-btn" data-target="sec2">02 品线结构</button>
+  <button class="nav-btn" data-target="sec3">03 服务质量</button>
+  <button class="nav-btn" data-target="sec4">04 客户资产</button>
+  <button class="nav-btn" data-target="sec5">05 质量执行</button>
+</nav>
+
 <main>
 
   <!-- ============ 01 经营结果类 ============ -->
@@ -181,6 +213,7 @@
       <span class="sec-tag">按品线 / 组别拆解</span>
     </div>
     <p class="sec-desc">一级锚点：<strong>销售额｜单流量｜转化率｜客单价</strong>　管理重点：以销售额、单流量、转化率、客单价呈现经营结果，按品线拆解定位差异。</p>
+    <div class="sum-row" id="sum1"></div>
 
     <div class="kpi-grid" id="kpiGrid"></div>
 
@@ -231,6 +264,7 @@
       <span class="sec-tag">核心品与套系两条线</span>
     </div>
     <p class="sec-desc">一级锚点：<strong>核心品板块｜成套化销售</strong>　管理重点：核心品台量与达成率稳住基本盘，套系销售占比带动客单提升。</p>
+    <div class="sum-row" id="sum2"></div>
 
     <div class="kpi-grid" id="kpiGrid2"></div>
 
@@ -281,6 +315,7 @@
       <span class="sec-tag">得分分布与样本结构</span>
     </div>
     <p class="sec-desc">一级锚点：<strong>平台会话质量｜企微会话质量</strong>　管理重点：平台与企微双场景监控，从得分、样本量到低分占比逐层定位。（追单组未开展会话质检，未纳入本板块图表；高分/0分维度本期均为 0，暂不展示）</p>
+    <div class="sum-row" id="sum3"></div>
 
     <div class="kpi-grid" id="kpiGrid3"></div>
 
@@ -321,6 +356,7 @@
       <span class="sec-tag">添加到转化的全链路</span>
     </div>
     <p class="sec-desc">一级锚点：<strong>企微添加</strong>　管理重点：沿添加、打标、蓄客、转化追踪客户资产，结合跟进记录与流失监控兜底。（追单组暂无客户资产数据，未纳入本板块图表）</p>
+    <div class="sum-row" id="sum4"></div>
 
     <div class="kpi-grid" id="kpiGrid4"></div>
 
@@ -386,6 +422,7 @@
       <span class="sec-tag">闭环与兜底机制</span>
     </div>
     <p class="sec-desc">一级锚点：<strong>四项核对｜响应与满意度</strong>　管理重点：四项核对防差错，响应与满意度守体验；结合预警闭环、优秀案例与问题类别复盘。（考试通过率本期未填报，仅在明细表体现）</p>
+    <div class="sum-row" id="sum5"></div>
 
     <div class="kpi-grid" id="kpiGrid5"></div>
 
